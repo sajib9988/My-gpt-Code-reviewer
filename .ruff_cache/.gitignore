@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Next.js
+.next/
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Ruff
+.ruff_cache/
+
+# IDE
+.vscode/

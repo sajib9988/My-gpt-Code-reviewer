@@ -1,0 +1,52 @@
+@import "tailwindcss";
+:root {
+    --ink: #e9edf2;
+    --muted: #8d98a6;
+    --panel: #131a21;
+    --panel-raised: #19232c;
+    --line: #293640;
+    --cyan: #71d4c4;
+    --amber: #f0b56d;
+    --bg: #0c1116;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: radial-gradient(circle at 80% -10%, rgba(113, 212, 196, 0.11), transparent 32rem), linear-gradient(135deg, #0b1015 0%, #101820 50%, #0b1115 100%);
+    color: var(--ink);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+::selection {
+    background: rgba(113, 212, 196, 0.28);
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-rise {
+    animation: rise 420ms ease-out both;
+}
