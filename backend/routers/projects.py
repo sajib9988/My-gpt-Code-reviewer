@@ -15,13 +15,12 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 @router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_csrf)])
 def create_project(
-    
-        if payload.repository_url:
-        repository_parts(payload.repository_url)
     payload: ProjectCreate,
     user: User = Depends(get_current_user),
     database: DatabaseSession = Depends(get_db),
 ) -> Project:
+    if payload.repository_url:
+        repository_parts(payload.repository_url)
     project = Project(id=str(uuid.uuid4()), owner_id=user.id, **payload.model_dump())
     database.add(project)
     database.commit()
