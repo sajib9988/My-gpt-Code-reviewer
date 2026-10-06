@@ -2,8 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.db.base import Base
-from app.db.session import engine
 from routers import agent, auth, changes, github, projects, scanner
 
 
@@ -17,8 +15,6 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Content-Type", "X-CSRF-Token"],
     )
-    if settings.environment == "development":
-        Base.metadata.create_all(bind=engine)
     app.include_router(auth.router, prefix=settings.api_prefix)
     app.include_router(agent.router, prefix=settings.api_prefix)
     app.include_router(changes.router, prefix=settings.api_prefix)

@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     app_name: str = "AI Coding Agent API"
     environment: str = "development"
     api_prefix: str = "/api/v1"
-    database_url: str = "sqlite:///./app.db"
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/ai_agent"
     redis_url: str = "redis://localhost:6379/0"
     session_cookie_name: str = "ai_agent_session"
     session_ttl_seconds: int = 60 * 60 * 24 * 7
