@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DatabaseSession
-
+from routers.github import repository_parts
 from app.db.session import get_db
 from app.models.auth import User
 from app.models.project import Project
@@ -15,6 +15,9 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 @router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_csrf)])
 def create_project(
+    
+        if payload.repository_url:
+        repository_parts(payload.repository_url)
     payload: ProjectCreate,
     user: User = Depends(get_current_user),
     database: DatabaseSession = Depends(get_db),

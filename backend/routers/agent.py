@@ -1,7 +1,14 @@
 import json
 import uuid
 from collections.abc import Iterator
+from datetime import UTC, datetime
 
+import httpx
+
+from app.core.config import get_settings
+from app.schemas.agent import ChatReply
+from services.chat import conversation_messages
+from services.llm import provider_for
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
@@ -118,7 +125,57 @@ def add_message(
     database.commit()
     database.refresh(message)
     return message
+@router.post(
+    "/conversations/{conversation_id}/chat",
+    response_model=ChatReply,
+    dependencies=[Depends(require_csrf)],
+)
+async def chat(
+    conversation_id: str,
+    payload: MessageCreate,
+    user: User = Depends(get_current_user),
+    database: DatabaseSession = Depends(get_db),
+) -> dict:
+    conversation = owned_conversation(conversation_id, user, database)
+    project = database.get(Project, conversation.project_id)
 
+    user_message = Message(
+        id=str(uuid.uuid4()),
+        conversation_id=conversation_id,
+        role="user",
+        content=payload.content,
+        created_at=datetime.now(UTC),
+    )
+    database.add(user_message)
+    if conversation.title == "New conversation":
+        conversation.title = payload.content.strip()[:60] or conversation.title
+    database.commit()
+    database.refresh(user_message)
+
+    history = list(
+        database.scalars(
+            select(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at)
+        )
+    )
+    try:
+        llm = provider_for(project.ai_provider)
+        response = await llm.complete(conversation_messages(database, project, history), project.ai_model)
+    except (httpx.HTTPError, KeyError, ValueError) as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail="AI provider request failed"
+        ) from error
+
+    assistant_message = Message(
+        id=str(uuid.uuid4()),
+        conversation_id=conversation_id,
+        role="assistant",
+        content=response.content,
+        created_at=datetime.now(UTC),
+    )
+    database.add(assistant_message)
+    database.commit()
+    database.refresh(assistant_message)
+    return {"user_message": user_message, "assistant_message": assistant_message}
 
 @router.post(
     "/projects/{project_id}/tasks",

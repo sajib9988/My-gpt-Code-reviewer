@@ -6,7 +6,7 @@ import { ArrowUpRight, Check, ChevronDown, CircleDot, FileCode2, FolderGit2, Git
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api, type Project, type ProjectFile, type Scan, type User } from "@/lib/api";
+import { api, Repo, type Project, type ProjectFile, type Scan, type User } from "@/lib/api";
 
 type AuthMode = "login" | "register";
 
@@ -17,6 +17,10 @@ const activity = [
 ];
 
 export default function Home() {
+    const [repoUrl, setRepoUrl] = useState("");
+const [branch, setBranch] = useState("main");
+const [repos, setRepos] = useState<Repo[]>([]);
+const [tab, setTab] = useState<"chat" | "overview">("chat");
     const [user, setUser] = useState<User | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [selected, setSelected] = useState<Project | null>(null);

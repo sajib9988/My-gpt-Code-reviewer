@@ -64,3 +64,6 @@ class AgentRunResponse(BaseModel):
     error: str | None
     created_at: datetime
     completed_at: datetime | None
+class ChatReply(BaseModel):
+    user_message: MessageResponse
+    assistant_message: MessageResponse

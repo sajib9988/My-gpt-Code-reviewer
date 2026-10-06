@@ -125,7 +125,16 @@ def github_callback(
     database.delete(oauth_state)
     database.commit()
     return RedirectResponse(url=f"{settings.frontend_url}/?github=connected", status_code=status.HTTP_303_SEE_OTHER)
-
+@router.get("/repositories", response_model=list[GitHubRepositoryResponse])
+def my_repositories(user: User = Depends(get_current_user), database: DatabaseSession = Depends(get_db)) -> list[dict]:
+    connection = get_connection(user, database)
+    client = github_client(connection)
+    try:
+        return client.repositories()
+    except GitHubAPIError as error:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="GitHub request failed") from error
+    finally:
+        client.close()
 
 @router.get("/connection", response_model=GitHubConnectionResponse)
 def connection_status(user: User = Depends(get_current_user), database: DatabaseSession = Depends(get_db)) -> dict:
